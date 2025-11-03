@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>fetched</title>
+  <style>
+    :root{
+      --bg-url: "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80";
+      --accent: rgba(255,255,255,0.95);
+      --card-bg: rgba(0,0,0,0.55);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{
+      background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url(var(--bg-url));
+      background-size:cover;background-position:center;color:var(--accent);display:flex;align-items:center;justify-content:center;padding:2rem;
+    }
+    .panel{max-width:960px;width:100%;background:var(--card-bg);border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.6);backdrop-filter:blur(6px)}
+    h1{text-align:center;margin-bottom:20px;font-size:1.8rem}
+    .info-line{font-size:1rem;margin:8px 0;font-family:monospace;white-space:pre-wrap;min-height:1.2em;}
+    #container{margin-top:20px}
+    button{margin-top:16px;background:rgba(255,255,255,0.1);border:none;padding:8px 16px;border-radius:8px;color:#fff;cursor:pointer}
+    footer{margin-top:12px;font-size:0.8rem;opacity:0.85;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Get doxxed N1gga</h1>
+    <div id="container"></div>
+    <button id="refresh">Refresh</button>
+    <footer>Made by Costa • discor.gg/rotat</footer>
+  </div>
+
+  <audio id="player" preload="auto" loop muted autoplay>
+    <source src="https://cdn.simple-music-host.example/sample.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const container = el('container');
+    const player = el('player');
+
+    player.volume = 0;
+    const fadeIn = setInterval(()=>{
+      if(player.volume < 1){player.volume += 0.05;} else {clearInterval(fadeIn);}
+    }, 300);
+
+    function typewriterEffect(target, text, delay = 30) {
+      let i = 0;
+      target.textContent = '';
+      const interval = setInterval(() => {
+        target.textContent += text.charAt(i);
+        i++;
+        if (i >= text.length) clearInterval(interval);
+      }, delay);
+    }
+
+    function displayInfo(data) {
+      container.innerHTML = '';
+      const entries = [
+        {k: 'IP', v: data.ip},
+        {k: 'ISP / Org', v: data.org},
+        {k: 'City, Region', v: `${data.city}, ${data.region}`},
+        {k: 'Country', v: `${data.country_name} (${data.country})`},
+        {k: 'Latitude, Longitude', v: `${data.latitude}, ${data.longitude}`},
+        {k: 'Browser', v: navigator.userAgent},
+        {k: 'Platform', v: navigator.platform}
+      ];
+      let delay = 0;
+      entries.forEach(entry => {
+        const line = document.createElement('div');
+        line.className = 'info-line';
+        container.appendChild(line);
+        setTimeout(() => {
+          typewriterEffect(line, `${entry.k}: ${entry.v}`);
+        }, delay);
+        delay += entry.v.length * 35;
+      });
+    }
+
+    async function fetchData() {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        displayInfo(data);
+      } catch (e) {
+        container.textContent = 'Error retrieving data.';
+      }
+    }
+
+    el('refresh').addEventListener('click', fetchData);
+
+    fetchData();
+  </script>
+</body>
+</html>
